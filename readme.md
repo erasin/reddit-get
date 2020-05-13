@@ -1,6 +1,6 @@
 # reddit-get
 
-> 查看 <//erasin.wang/go-colly/>
+> 查看 <https://erasin.wang/go-colly/>
 
 使用 golang 来创建一个爬虫获取 <[reddit.com](http://www.reddit.com)> 图片。
 

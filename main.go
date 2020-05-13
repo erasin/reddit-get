@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -68,14 +69,20 @@ var limit int64 = 24  // reddit 每页数量
 func run(chanel, dir string) {
 	log.Printf("--> %s/%s\n", dir, chanel)
 	endPage := startPage + limitPage
-	// 创建默认
-	c := colly.NewCollector(colly.AllowURLRevisit())
 
 	// 加载代理
 	rp, err := proxy.RoundRobinProxySwitcher("socks5://127.0.0.1:7891")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	downloadClient := http.DefaultClient
+	downloadClient.Transport = &http.Transport{
+		Proxy: rp,
+	}
+
+	// 创建默认
+	c := colly.NewCollector(colly.AllowURLRevisit())
 	c.SetProxyFunc(rp)
 
 	// 记录
@@ -104,7 +111,12 @@ func run(chanel, dir string) {
 				formatedURL := html.UnescapeString(string(url))
 				_, filename := filepath.Split(formatedURL)
 				if fileExtToDownload[filepath.Ext(filename)] {
-					f := DownloadFile{Filename: filename, Folder: chanel, URL: formatedURL}
+					f := DownloadFile{
+						Filename: filename,
+						Folder:   chanel,
+						URL:      formatedURL,
+						client:   downloadClient,
+					}
 					go f.Down(dir)
 				}
 			}, "data", "children")

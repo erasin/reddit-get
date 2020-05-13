@@ -13,6 +13,7 @@ type DownloadFile struct {
 	Filename string
 	Folder   string
 	URL      string
+	client   *http.Client
 }
 
 // Down 开始下载
@@ -35,7 +36,7 @@ func (f *DownloadFile) Down(directory string) {
 		log.Println("创建失败: ", err)
 	}
 
-	response, err := http.Get(f.URL)
+	response, err := f.client.Get(f.URL)
 	if err != nil {
 		log.Println("下载失败: ", err)
 	}
